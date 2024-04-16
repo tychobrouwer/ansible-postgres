@@ -1,0 +1,4 @@
+---
+# vars file for ansible-postgres
+postgres_db_user: postgres
+postgres_db_name: postgres
