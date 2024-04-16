@@ -41,7 +41,7 @@
   become_method: su
   become_user: postgres
   vars:
-    ansible_ssh_pipelining: no
+    ansible_ssh_pipelining: false
 
 - name: Create the postgres database
   community.postgresql.postgresql_db:
@@ -55,7 +55,7 @@
   become_method: su
   become_user: postgres
   vars:
-    ansible_ssh_pipelining: no
+    ansible_ssh_pipelining: false
 
 - name: Grant postgres user access to database
   community.postgresql.postgresql_pg_hba:
@@ -74,4 +74,4 @@
   become_method: su
   become_user: postgres
   vars:
-    ansible_ssh_pipelining: no
+    ansible_ssh_pipelining: false
