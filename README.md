@@ -6,17 +6,20 @@ The role configures and installs PostgreSQL.
 Role Variables
 --------------
 
-
 Example Playbook
 ----------------
 
 ```yaml
-    - hosts: servers
-      vars:
+- hosts: servers
+  vars:
+    postgres_db_pass: "password"
 
-      roles:
-         - { role: tychobrouwer.postgres, postgres_db_pass: "password" }
-         - { role: tychobrouwer.postgres, postgres_db_pass: "password", postgres_db_user: "postgres", postgres_db_name: "postgres" }
+  roles:
+    - role: tychobrouwer.postgres
+
+    - role: tychobrouwer.postgres
+      postgres_db_user: "postgres"
+      postgres_db_name: "postgres"
 ```
 
 License
