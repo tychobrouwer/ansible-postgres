@@ -9,41 +9,43 @@
       - gnupg
     state: present
 
-- name: Get postgresql Version
+- name: Get PostgreSQL Version
   ansible.builtin.command: "psql --version"
   changed_when: false
   register: postgresql_version_raw
 
-- name: Set postgresql password encryption
+- name: Set PostgreSQL password encryption
   ansible.builtin.lineinfile:
-    path: "/etc/postgresql/{{ postgresql_version_raw | regex_search('\\d\\d') }}/main/postgresql.conf"
+    path: "/etc/postgresql/{{ postgresql_version_raw.stdout | regex_search('\\d\\d') }}/main/postgresql.conf"
     regexp: "^password_encryption = "
     insertafter: "^#password_encryption = "
     line: password_encryption = scram-sha-256
+  notify: Restart PostgreSQL
 
 - name: Ensure a locale exists
   community.general.locale_gen:
     name: en_US.UTF-8
     state: present
-  notify: Restart postgresql service
+  notify: Restart PostgreSQL
 
-- name: Start postgresql service
-  ansible.builtin.service:
+- name: Start PostgreSQL service
+  ansible.builtin.systemd:
     name: postgresql
     state: started
     enabled: true
 
-- name: Create the postgres database user
+- name: Create the PostgreSQL user if not exists
   community.postgresql.postgresql_user:
     name: "{{ postgres_db_user }}"
     password: "{{ postgres_db_password }}"
+    state: present
   become: true
-  become_method: su
+  become_method: ansible.builtin.su
   become_user: postgres
   vars:
     ansible_ssh_pipelining: false
 
-- name: Create the postgres database
+- name: Create the PostgreSQL database if not exists
   community.postgresql.postgresql_db:
     name: "{{ postgres_db_name }}"
     encoding: UTF-8
@@ -51,27 +53,30 @@
     lc_ctype: en_US.UTF-8
     template: template0
     owner: "{{ postgres_db_user }}"
+    state: present
   become: true
-  become_method: su
+  become_method: ansible.builtin.su
   become_user: postgres
   vars:
     ansible_ssh_pipelining: false
 
-- name: Grant postgres user access to database
+- name: Grant PostgreSQL user access to the database
   community.postgresql.postgresql_pg_hba:
-    dest: "/etc/postgresql/{{ postgresql_version_raw | regex_search('\\d\\d') }}/main/pg_hba.conf"
+    dest: "/etc/postgresql/{{ postgresql_version_raw.stdout | regex_search('\\d\\d') }}/main/pg_hba.conf"
     contype: local
     users: "{{ postgres_db_user }}"
     databases: "{{ postgres_db_name }}"
     method: scram-sha-256
     create: true
+  notify: Restart PostgreSQL service
 
-- name: Connect to database
+- name: Connect to the database
   community.postgresql.postgresql_user:
     db: "{{ postgres_db_name }}"
     name: "{{ postgres_db_user }}"
+    state: present
   become: true
-  become_method: su
+  become_method: ansible.builtin.su
   become_user: postgres
   vars:
     ansible_ssh_pipelining: false
