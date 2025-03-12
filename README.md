@@ -12,7 +12,7 @@ Example Playbook
 ```yaml
 - hosts: servers
   vars:
-    postgres_db_pass: "password"
+    postgres_db_password: "password"
 
   roles:
     - role: tychobrouwer.postgres

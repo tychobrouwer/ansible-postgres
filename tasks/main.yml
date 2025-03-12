@@ -68,7 +68,7 @@
     databases: "{{ postgres_db_name }}"
     method: scram-sha-256
     create: true
-  notify: Restart PostgreSQL service
+  notify: Restart PostgreSQL
 
 - name: Connect to the database
   community.postgresql.postgresql_user:
