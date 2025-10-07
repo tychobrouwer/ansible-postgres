@@ -34,18 +34,18 @@
     state: started
     enabled: true
 
-- name: Create the PostgreSQL user if not exists
-  community.postgresql.postgresql_user:
-    name: "{{ postgres_db_user }}"
-    password: "{{ postgres_db_password }}"
-    state: present
-  become: true
-  become_user: postgres
-  vars:
-    ansible_ssh_pipelining: false
-
 - name: Setup PostgreSQL database
   block:
+    - name: Create the PostgreSQL user if not exists
+      community.postgresql.postgresql_user:
+        name: "{{ postgres_db_user }}"
+        password: "{{ postgres_db_password }}"
+        state: present
+      become: true
+      become_user: postgres
+      vars:
+        ansible_ssh_pipelining: false
+
     - name: Create the PostgreSQL database if not exists
       community.postgresql.postgresql_db:
         name: "{{ postgres_db_name }}"
